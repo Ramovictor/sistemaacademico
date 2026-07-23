@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cursojava.sistemaacademico.service.AlunoService;
@@ -51,28 +52,30 @@ public class AlunoRestController {
 
     // retirar as notas de uum aluno...
     @GetMapping("{id}/notas")
-    public List<Nota> listarNotas(@PathVariable Long id) {
+    public ResponseEntity<List<Nota>> listarNotas(@PathVariable Long id) {
         Aluno aluno = alunoService.buscarPorId(id);
 
         if (aluno == null) {
-            return List.of();
+            return ResponseEntity.notFound().build();
         }
 
-        return aluno.getNotas();
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/media")
-    public Map<String, Object> consultarMedia(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> consultarMedia(@PathVariable Long id) {
         Aluno aluno = alunoService.buscarPorId(id);
 
         if (aluno == null) {
-            return Map.of("erro", "Aluno nao encontrado");
+            return ResponseEntity.notFound().build();
         }
 
-        return Map.of(
+        Map<String, Object> resposta = Map.of(
                 "nome", aluno.getNome(),
                 "media", aluno.getMedia(),
                 "situacao", aluno.getSituacao());
+
+        return ResponseEntity.ok(resposta);
     }
 
     // /alunos -> pagina HTML(retorna a lista de alunos em HTML)
@@ -218,6 +221,44 @@ public class AlunoRestController {
         }
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{id}/notas")
+    public @PostMapping("{id}/notas") public ResponseEntity<Nota> cadastrarNota(
+            @PathVariable Long id,
+            @RequestBody Nota nota) {
+
+        Aluno aluno = alunoService.buscarPorId(id);
+
+        if (aluno == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (alunoService.notaInvalida(nota)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Nota notaCadastrada = (Nota) alunoService.cadastrarNota(
+                id,
+                nota.getDescricao(),
+                nota.getValor());
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(notaCadastrada);
+    }
+
+    @GetMapping("/busca")
+    public ResponseEntity<List<Aluno>> buscarPorNome(
+            @RequestParam String nome) {
+
+        if (nome.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Aluno> encontrados = alunoService.buscarPorNome(nome);
+
+        return ResponseEntity.ok(encontrados);
     }
 }
 

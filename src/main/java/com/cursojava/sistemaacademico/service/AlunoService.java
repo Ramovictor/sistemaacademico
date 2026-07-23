@@ -28,13 +28,14 @@ public class AlunoService {
         return alunoRepository.salvar(nome, email, matricula, idade);
     }
 
-    public void cadastrarNota(Long alunoId, String descricao, double valor) {
+    public Nota cadastrarNota(Long alunoId, String descricao, double valor) {
         Aluno aluno = alunoRepository.buscarPorId(alunoId);
 
         if (aluno != null) {
             Nota nota = new Nota(descricao, valor);
             aluno.adicionarNota(nota);
         }
+        return null;
     }
 
     public Aluno alunosCadastrados(Long id) {
@@ -67,5 +68,10 @@ public class AlunoService {
 
     public boolean excluirAluno(Long id) {
         return alunoRepository.excluir(id);
+    }
+
+    public boolean notaInvalida(Nota nota) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'notaInvalida'");
     }
 }
